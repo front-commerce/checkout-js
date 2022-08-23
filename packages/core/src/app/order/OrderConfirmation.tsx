@@ -61,31 +61,12 @@ class OrderConfirmation extends Component<
 > {
     state: OrderConfirmationState = {};
 
-    private embeddedMessenger?: EmbeddedCheckoutMessenger;
-
     componentDidMount(): void {
         const {
-            containerId,
-            createEmbeddedMessenger,
-            createStepTracker,
-            embeddedStylesheet,
-            loadOrder,
             orderId,
         } = this.props;
 
-        loadOrder(orderId)
-            .then(({ data }) => {
-                const { links: { siteLink = '' } = {} } = data.getConfig() || {};
-                const messenger = createEmbeddedMessenger({ parentOrigin: siteLink });
-
-                this.embeddedMessenger = messenger;
-
-                messenger.receiveStyles(styles => embeddedStylesheet.append(styles));
-                messenger.postFrameLoaded({ contentId: containerId });
-
-                createStepTracker().trackOrderComplete();
-            })
-            .catch(this.handleUnhandledError);
+        window.location.href = `http://front-commerce.localhost:4000/confirmation/${orderId}`
     }
 
     render(): ReactNode {
@@ -277,17 +258,6 @@ class OrderConfirmation extends Component<
                     isSigningUp: false,
                 });
             });
-    };
-
-    private handleUnhandledError: (error: Error) => void = error => {
-        const { errorLogger } = this.props;
-
-        this.setState({ error });
-        errorLogger.log(error);
-
-        if (this.embeddedMessenger) {
-            this.embeddedMessenger.postError(error);
-        }
     };
 }
 
